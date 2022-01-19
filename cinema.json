@@ -1,0 +1,26 @@
+{
+  "total_rows":9,
+  "total_columns":9,
+  "available_seats":[
+    {
+      "row":1,
+      "column":1
+    },
+    {
+      "row":1,
+      "column":2
+    },
+    {
+      "row":1,
+      "column":3
+    },
+    {
+      "row":9,
+      "column":8
+    },
+    {
+      "row":9,
+      "column":9
+    }
+  ]
+}
