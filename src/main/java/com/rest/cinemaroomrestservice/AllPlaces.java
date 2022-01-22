@@ -6,7 +6,6 @@ public class AllPlaces {
     final private Integer total_rows = 9;
     final private Integer total_columns = 9;
     private Integer price;
-    private String status;
 
     public Integer getPrice() {
         return price;
@@ -37,14 +36,16 @@ public class AllPlaces {
     public void ShowAvailPlace() {
         Integer price;
 
-        for (int i = 1; i <= total_rows; i++) {
-            for (int q = 1; q <= total_columns; q++) {
-                Map<String, Integer> avail = new LinkedHashMap<>();
-                price = i <= 4 ? 10 : 8;
-                avail.put("row", i);
-                avail.put("column", q);
-                avail.put("price", price);
-                this.available_seats.add(avail);
+        if (this.available_seats.isEmpty()) {
+            for (int i = 1; i <= total_rows; i++) {
+                for (int q = 1; q <= total_columns; q++) {
+                    Map<String, Integer> avail = new LinkedHashMap<>();
+                    price = i <= 4 ? 10 : 8;
+                    avail.put("row", i);
+                    avail.put("column", q);
+                    avail.put("price", price);
+                    this.available_seats.add(avail);
+                }
             }
         }
     }
