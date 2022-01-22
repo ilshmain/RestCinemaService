@@ -5,6 +5,17 @@ import java.util.*;
 public class AllPlaces {
     final private Integer total_rows = 9;
     final private Integer total_columns = 9;
+    private Integer price;
+    private String status;
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
     public List<Map<String, Integer>> available_seats = new ArrayList<>();
 
     public Integer getTotal_rows() {
@@ -24,14 +35,29 @@ public class AllPlaces {
     }
 
     public void ShowAvailPlace() {
+        Integer price;
+
         for (int i = 1; i <= total_rows; i++) {
             for (int q = 1; q <= total_columns; q++) {
                 Map<String, Integer> avail = new LinkedHashMap<>();
+                price = i <= 4 ? 10 : 8;
                 avail.put("row", i);
                 avail.put("column", q);
+                avail.put("price", price);
                 this.available_seats.add(avail);
             }
         }
+    }
+
+    public Map<String, Integer> ShowBuyTicket(Integer row, Integer column) {
+        Integer price;
+        price = row <= 4 ? 10 : 8;
+
+        Map<String, Integer> avail = new LinkedHashMap<>();
+        avail.put("row", row);
+        avail.put("column", column);
+        avail.put("price", price);
+        return avail;
     }
 }
 
