@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -17,6 +14,7 @@ public class PrintCinemaPlaces {
     Map<Integer, Integer> purchasePlace = new HashMap<>();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     ErrorMessage message = new ErrorMessage();
+    Stats stats = new Stats();
     List<BuyTicket> tickets = new ArrayList<>();
 
 
@@ -45,6 +43,9 @@ public class PrintCinemaPlaces {
             }
         } catch (NullPointerException e) {
             purchasePlace.put(rcp.getRow(), rcp.getColumn());
+            stats.setCurrent_income(stats.getCurrent_income() + rcp.getPrice());
+            stats.setNumber_of_available_seats(stats.getNumber_of_available_seats() - 1);
+            stats.setNumber_of_purchased_tickets(stats.getNumber_of_purchased_tickets() +1);
         }
         return false;
     }
@@ -73,6 +74,9 @@ public class PrintCinemaPlaces {
                 ReturnTicket returnTick = new ReturnTicket();
                 returnTick.setReturnTicket(elem.getTicket());
                 purchasePlace.remove(returnTick.getReturnTicket().get("row"),returnTick.getReturnTicket().get("column"));
+                stats.setCurrent_income(stats.getCurrent_income() - returnTick.getReturnTicket().get("price"));
+                stats.setNumber_of_available_seats(stats.getNumber_of_available_seats() + 1);
+                stats.setNumber_of_purchased_tickets(stats.getNumber_of_purchased_tickets() - 1);
                 tickets.remove(count);
                 return new ResponseEntity(gson.toJson(returnTick), HttpStatus.OK);
             }
@@ -80,5 +84,15 @@ public class PrintCinemaPlaces {
         }
         message.setError("Wrong token!");
         return new ResponseEntity(gson.toJson(message), HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/stats")
+    ResponseEntity<String> stats(@RequestParam(required = false) String password) {
+        if (password != null && password.equals("super_secret")) {
+            return new ResponseEntity(gson.toJson(stats), HttpStatus.OK);
+        } else {
+            message.setError("The password is wrong!");
+            return new ResponseEntity(gson.toJson(message), HttpStatus.UNAUTHORIZED);
+        }
     }
 }
