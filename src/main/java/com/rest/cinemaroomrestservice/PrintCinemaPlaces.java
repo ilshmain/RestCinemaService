@@ -79,6 +79,6 @@ public class PrintCinemaPlaces {
             count++;
         }
         message.setError("Wrong token!");
-        return new ResponseEntity(gson.toJson(message), HttpStatus.OK);
+        return new ResponseEntity(gson.toJson(message), HttpStatus.BAD_REQUEST);
     }
 }
