@@ -8,50 +8,77 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class PrintCinemaPlaces {
     AllPlaces allPlaces = new AllPlaces();
     Map<Integer, Integer> purchasePlace = new HashMap<>();
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    ErrorMessage message = new ErrorMessage();
+    List<BuyTicket> tickets = new ArrayList<>();
 
 
     @GetMapping("/seats")
     public String printCinemaPlaces() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        allPlaces.ShowAvailPlace();
         return gson.toJson(allPlaces);
     }
 
-    @PostMapping("/purchase")
-    ResponseEntity<String> buyPlace(@RequestBody Map<String, Integer> place) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        Integer row = 0;
-        Integer column = 0;
-        for (Map.Entry<String, Integer> elem : place.entrySet()) {
-            if (elem.getKey().equals("row")) {
-                row = elem.getValue();
-            } else {
-                column = elem.getValue();
-            }
+    boolean checkRowColumn(Map<String, Integer> place, RCP rcp) {
+        try {
+            rcp.setRow(place.get("row"));
+            rcp.setColumn(place.get("column"));
+            rcp.setPrice(rcp.getRow() <= 4 ? 10 : 8);
+        } catch (NullPointerException e) {
+            message.setError("Wrong parametr");
+            return true;
         }
-        if (row > allPlaces.getTotal_rows() || column >allPlaces.getTotal_columns() || row < 1 || column < 1) {
-            ErrorMessage message = new ErrorMessage("The number of a row or a column is out of bounds!");
-            return new ResponseEntity(gson.toJson(message), HttpStatus.BAD_REQUEST);
-
+        if (rcp.getRow() > allPlaces.getTotal_rows() || rcp.getColumn() >allPlaces.getTotal_columns() || rcp.getRow() < 1 ||  rcp.getColumn() < 1) {
+            message.setError("The number of a row or a column is out of bounds!");
+            return true;
         }
         try {
-            if (purchasePlace.get(row).equals(column)) {
-                ErrorMessage message = new ErrorMessage("The ticket has been already purchased!");
-                return new ResponseEntity(gson.toJson(message), HttpStatus.BAD_REQUEST);
+            if (purchasePlace.get(rcp.getRow()).equals(rcp.getColumn())) {
+                message.setError("The ticket has been already purchased!");
+                return true;
             }
-        } catch (NullPointerException e) {}
-        purchasePlace.put(row, column);
-        return new ResponseEntity(gson.toJson(allPlaces.ShowBuyTicket(row, column)), HttpStatus.OK);
+        } catch (NullPointerException e) {
+            purchasePlace.put(rcp.getRow(), rcp.getColumn());
+        }
+        return false;
+    }
+
+    @PostMapping("/purchase")
+    ResponseEntity<String> buyTicket(@RequestBody Map<String, Integer> place) {
+        RCP rcp = new RCP();
+
+        if (checkRowColumn(place, rcp)) {
+            return new ResponseEntity(gson.toJson(message), HttpStatus.BAD_REQUEST);
+        }
+
+        BuyTicket ticket = new BuyTicket(UUID.randomUUID(), rcp.getRow(), rcp.getColumn(), rcp.getPrice());
+        tickets.add(ticket);
+        return new ResponseEntity(gson.toJson(ticket), HttpStatus.OK);
+    }
+
+    @PostMapping("/return")
+    ResponseEntity<String> returnTicket(@RequestBody Map<String, UUID> place) {
+        UUID tocken;
+        tocken = place.get("token");
+
+        int count = 0;
+        for (BuyTicket elem : tickets) {
+            if (elem.compareTocken(tocken)) {
+                ReturnTicket returnTick = new ReturnTicket();
+                returnTick.setReturnTicket(elem.getTicket());
+                purchasePlace.remove(returnTick.getReturnTicket().get("row"),returnTick.getReturnTicket().get("column"));
+                tickets.remove(count);
+                return new ResponseEntity(gson.toJson(returnTick), HttpStatus.OK);
+            }
+            count++;
+        }
+        message.setError("Wrong token!");
+        return new ResponseEntity(gson.toJson(message), HttpStatus.OK);
     }
 }
