@@ -29,7 +29,7 @@ public class PrintCinemaPlaces {
             rcp.setColumn(place.get("column"));
             rcp.setPrice(rcp.getRow() <= 4 ? 10 : 8);
         } catch (NullPointerException e) {
-            message.setError("Wrong parametr");
+            message.setError("Wrong parameter");
             return true;
         }
         if (rcp.getRow() > allPlaces.getTotal_rows() || rcp.getColumn() >allPlaces.getTotal_columns() || rcp.getRow() < 1 ||  rcp.getColumn() < 1) {
