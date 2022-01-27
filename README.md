@@ -7,6 +7,7 @@
 #### Для запуска приложения выполните следующие команды:
 >./gradlew build <br> java -jar build/libs/CinemaRoomRESTService-0.0.1-SNAPSHOT.jar
 
+#### Описание запросов:
 1) /seats 
    >Обрабатывает GET запрос и возвращает информацию о местах в кинотеатре.
 2) /purchase 
