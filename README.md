@@ -4,6 +4,9 @@
 
 ### Для проверки работоспособности проекта необходимо запустить приложение и в Postman отправлять указанные в описание запросы на http://localhost:8080 (/seats, /purchase, /return)
 
+#### Для запуска приложения выполните следующие команды:
+>./gradlew build <br> java -jar build/libs/CinemaRoomRESTService-0.0.1-SNAPSHOT.jar
+
 1) /seats 
    >Обрабатывает GET запрос и возвращает информацию о местах в кинотеатре.
 2) /purchase 
